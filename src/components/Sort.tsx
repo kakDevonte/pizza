@@ -1,30 +1,39 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectSort, setSort } from '../redux/slices/filterSlice';
+import { useDispatch } from 'react-redux';
+import { setSort } from '../redux/filter/slice';
+import { SortPropertyEnum, SortType } from '../redux/filter/types';
 
-export const sortList = [
-  { name: 'популярности(DESC)', sortProperty: 'rating' },
-  { name: 'популярности(ASC)', sortProperty: '-rating' },
-  { name: 'цене(DESC)', sortProperty: 'price' },
-  { name: 'цене(ASC)', sortProperty: '-price' },
-  { name: 'алфавиту(DESC)', sortProperty: 'title' },
-  { name: 'алфавиту(ASC)', sortProperty: '-title' },
+type SortItem = {
+  name: string;
+  sortProperty: SortPropertyEnum;
+};
+
+type SortProps = {
+  value: SortType;
+};
+
+export const sortList: SortItem[] = [
+  { name: 'популярности(DESC)', sortProperty: SortPropertyEnum.RATING_DESC },
+  { name: 'популярности(ASC)', sortProperty: SortPropertyEnum.RATING_ASC },
+  { name: 'цене(DESC)', sortProperty: SortPropertyEnum.PRICE_DESC },
+  { name: 'цене(ASC)', sortProperty: SortPropertyEnum.PRICE_ASC },
+  { name: 'алфавиту(DESC)', sortProperty: SortPropertyEnum.TITLE_DESC },
+  { name: 'алфавиту(ASC)', sortProperty: SortPropertyEnum.TITLE_ASC },
 ];
 
-const Sort = () => {
+export const Sort: React.FC<SortProps> = React.memo(({ value }) => {
   const dispatch = useDispatch();
-  const sortRef = React.useRef();
-  const sort = useSelector(selectSort);
+  const sortRef = React.useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = React.useState(false);
 
-  const onClickSelectedSort = (obj) => {
+  const onClickSelectedSort = (obj: SortItem) => {
     dispatch(setSort(obj));
     setIsVisible(false);
   };
 
   React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.path.includes(sortRef.current)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortRef.current && !event.composedPath().includes(sortRef.current)) {
         setIsVisible(false);
       }
     };
@@ -50,7 +59,7 @@ const Sort = () => {
             />
           </svg>
           <b>Сортировка по:</b>
-          <span onClick={() => setIsVisible(!isVisible)}>{sort.name}</span>
+          <span onClick={() => setIsVisible(!isVisible)}>{value.name}</span>
         </div>
         {isVisible && (
           <div className="sort__popup">
@@ -59,7 +68,7 @@ const Sort = () => {
                 <li
                   key={index}
                   className={
-                    sort.sortProperty === obj.sortProperty ? 'active' : ''
+                    value.sortProperty === obj.sortProperty ? 'active' : ''
                   }
                   onClick={() => onClickSelectedSort(obj)}
                 >
@@ -72,6 +81,4 @@ const Sort = () => {
       </div>
     </>
   );
-};
-
-export default Sort;
+});
